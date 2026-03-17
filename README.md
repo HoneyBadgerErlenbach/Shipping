@@ -57,11 +57,9 @@ This takes **15–30 minutes**. It will:
 - Install Tailscale
 - Switch network management from `dhcpcd` → `NetworkManager` (required for AP/hotspot mode)
 - Create a Python virtual environment under `venv/`
-- Install all Python packages from `requirements.txt` (Flask, OpenCV, Ultralytics/YOLO, etc.)
+- Install all Python packages from `requirements.txt` (Flask, OpenCV, etc.)
 - Print a verification summary — all items should show a version number, not "MISSING"
 
-> **If YOLO fails to install** on older Pi models: run `sudo ./install_yolo_arm.sh` separately.
-> This compiles ARM-compatible PyTorch wheels and takes an extra 15–30 minutes.
 
 ---
 
@@ -167,7 +165,6 @@ sudo shutdown -h now
 | "Kiki-Setup" WiFi doesn't appear | `sudo systemctl restart honeybadger` then check logs |
 | Can't connect to "Kiki-Setup" | Password is `kiki-XXXXXX` — check the label on the device bottom |
 | Script exits: "DEVICE NOT READY TO SHIP" | `KIKI_API_KEY` is blank — set it in `.env` and re-run |
-| YOLO/PyTorch install fails | Run `sudo ./install_yolo_arm.sh` separately |
 | Tailscale step skipped | Add `TAILSCALE_AUTHKEY` to `.env` before running prep |
 | Cloudflare DNS registration warning | Ensure `cloudflared` is installed and the tunnel is authenticated |
 | Customer never receives welcome email | `KIKI_API_KEY` doesn't match the value on the cloud API server |
