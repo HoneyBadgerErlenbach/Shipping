@@ -12,7 +12,6 @@ for the customer to complete setup themselves.
 - Raspberry Pi with onboard WiFi (Pi 4 or Pi 5 recommended)
 - microSD card (32 GB+) and a card reader
 - Power supply and a way to SSH in (ethernet cable or temporary WiFi)
-- `KIKI_API_KEY` — the shared secret configured on the cloud API server
 - `TAILSCALE_AUTHKEY` — generate one at tailscale.com → Settings → Keys → Generate Auth Key
 
 ---
@@ -94,7 +93,7 @@ Type `yes` when prompted. This is fully automated:
 | 1 | Stops any running services |
 | 2 | Wipes the database — cameras, passwords, events, recordings |
 | 3 | Generates a fresh `FERNET_KEY` for camera password encryption |
-| 4 | Compiles Python source to bytecode and removes `.py` files |
+| 4 | Compiles Python source to native `.so` binaries with Cython, strips debug symbols, removes `.py` source files and `.git` history |
 | 5 | Sets restrictive file permissions (`700` dirs, `600` secrets) |
 | 6 | Installs and enables `honeybadger.service` in systemd (auto-starts on boot) |
 | 7 | Adds sudoers and polkit rules so the service can manage iptables and NetworkManager |
@@ -166,4 +165,4 @@ sudo shutdown -h now
 | Script exits: "DEVICE NOT READY TO SHIP" | `KIKI_API_URL` is blank — set it in `.env` and re-run |
 | Tailscale step skipped | Add `TAILSCALE_AUTHKEY` to `.env` before running prep |
 | Cloudflare DNS registration warning | Ensure `cloudflared` is installed and the tunnel is authenticated |
-| Customer never receives welcome email | `KIKI_API_KEY` doesn't match the value on the cloud API server |
+| Customer never receives welcome email | Check that `KIKI_API_URL` in `.env` points to the correct cloud server |
