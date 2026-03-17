@@ -136,7 +136,7 @@ sudo shutdown -h now
 
 - Ensure the SD card is seated firmly
 - Box with the power supply cable
-- Attach the printed QR label to the bottom of the device
+- Attach the printed QR label to the bottom of the device (the label includes the Kiki-Setup WiFi password)
 
 ---
 
