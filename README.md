@@ -114,11 +114,16 @@ The device ID (`XXXXXX`) is derived from the last 6 characters of the WiFi MAC a
 ## Step 6 — Verify the device
 
 1. On your phone, open WiFi settings
-2. Confirm **Kiki-Setup** appears (no password needed)
-3. Connect to it — the setup page should open automatically as a captive portal
-4. If it doesn't open automatically, navigate to `http://192.168.4.1:5000`
-5. The WiFi + email setup form should be visible
-6. Disconnect your phone from Kiki-Setup
+2. Confirm **Kiki-Setup** appears — it is WPA2-protected
+3. The WiFi password is printed on the setup page at `http://192.168.4.1:5000`, and is
+   also derived from the device MAC: **`kiki-XXXXXX`** where `XXXXXX` is the last 6 hex
+   digits of the WiFi MAC address (uppercase, no colons).
+   Example: MAC `dc:a6:32:a1:b2:c3` → password `kiki-A1B2C3`
+4. Connect to **Kiki-Setup** using that password
+5. The setup page should open automatically as a captive portal
+6. If it doesn't open automatically, navigate to `http://192.168.4.1:5000`
+7. The WiFi + email setup form should be visible, with the hotspot password displayed on-screen
+8. Disconnect your phone from Kiki-Setup
 
 If "Kiki-Setup" does not appear, check logs:
 ```bash
@@ -142,14 +147,16 @@ sudo shutdown -h now
 ## What the customer does on first boot
 
 1. Plugs in the Pi — waits ~60 seconds for it to boot
-2. Sees **"Kiki-Setup"** WiFi on their phone (no password)
-3. Connects — setup page opens automatically
-4. Selects home WiFi from the list, enters the password and their email address
-5. Taps **Connect** — the Pi reboots onto their home network, "Kiki-Setup" disappears
-6. Receives a welcome email with a link to the dashboard on their local network
-7. Clicks the link → creates a **username, password, and security question**
-8. Logs in — a 6-digit verification code is emailed for security
-9. Adds cameras from the **Cameras** page (ONVIF auto-scan or manual entry)
+2. Sees **"Kiki-Setup"** WiFi on their phone
+3. The WiFi password is **`kiki-XXXXXX`** (last 6 hex digits of the device MAC, uppercase) —
+   this is printed on the label attached to the bottom of the device
+4. Connects to **Kiki-Setup** using that password — setup page opens automatically
+5. Selects home WiFi from the list, enters the password and their email address
+6. Taps **Connect** — the Pi reboots onto their home network, "Kiki-Setup" disappears
+7. Receives a welcome email with a link to the dashboard on their local network
+8. Clicks the link → creates a **username and password**
+9. Logs in — a 6-digit verification code is emailed for security
+10. Adds cameras from the **Cameras** page (ONVIF auto-scan or manual entry)
 
 ---
 
@@ -158,6 +165,7 @@ sudo shutdown -h now
 | Symptom | Fix |
 |---------|-----|
 | "Kiki-Setup" WiFi doesn't appear | `sudo systemctl restart honeybadger` then check logs |
+| Can't connect to "Kiki-Setup" | Password is `kiki-XXXXXX` — check the label on the device bottom |
 | Script exits: "DEVICE NOT READY TO SHIP" | `KIKI_API_KEY` is blank — set it in `.env` and re-run |
 | YOLO/PyTorch install fails | Run `sudo ./install_yolo_arm.sh` separately |
 | Tailscale step skipped | Add `TAILSCALE_AUTHKEY` to `.env` before running prep |
