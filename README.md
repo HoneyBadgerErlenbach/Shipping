@@ -64,6 +64,18 @@ This takes **15–30 minutes**. It will:
 
 ## Step 4 — Set the required secrets
 
+First, generate your Tailscale auth key:
+
+1. Go to **tailscale.com** → log in → **Settings** → **Keys**
+2. Click **Generate auth key**
+3. Configure it:
+   - **Reusable:** No (one-time use per device)
+   - **Expiry:** 90 days
+   - Tags: none needed
+4. Click **Generate key** — copy it immediately (it won't be shown again)
+
+Then open the `.env` file on the Pi:
+
 ```bash
 nano /home/pi/HoneyBadgerCameraSystem/.env
 ```
@@ -79,16 +91,6 @@ TAILSCALE_AUTHKEY=tskey-auth-xxxxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 - No quotes, no spaces around the `=`
 - One line, key starts with `tskey-auth-`
 - Generate a **new key per device** — each key is one-time use
-
-**How to generate the key on tailscale.com:**
-1. Go to **tailscale.com** → log in → **Settings** → **Keys**
-2. Click **Generate auth key**
-3. Configure it:
-   - **Reusable:** No (one-time use per device)
-   - **Expiry:** 90 days
-   - Tags: none needed
-4. Click **Generate key** — copy it immediately (it won't be shown again)
-5. Paste it into `.env` after `TAILSCALE_AUTHKEY=`
 
 Save and close (`Ctrl+X → Y → Enter`).
 
@@ -182,4 +184,5 @@ sudo shutdown -h now
 | Tailscale step skipped | Add `TAILSCALE_AUTHKEY` to `.env` before running prep |
 | Cloudflare DNS registration warning | Ensure `cloudflared` is installed and the tunnel is authenticated |
 | Customer never receives welcome email | Check that `KIKI_API_URL` in `.env` points to the correct cloud server |
+
 
