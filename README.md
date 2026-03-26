@@ -98,7 +98,45 @@ Save and close (`Ctrl+X → Y → Enter`).
 
 ---
 
-## Step 5 — Run the shipping preparation script
+## Step 5 — Pre-configure cameras *(only when shipping cameras with the terminal)*
+
+Skip this step if the customer is adding their own cameras later.
+
+See **[pre-configured-camera-shipping.md](pre-configured-camera-shipping.md)** for full detail. Summary:
+
+**5a — Prepare each camera (one-time per camera, via manufacturer app)**
+- Set the admin password
+- Enable ONVIF (Reolink: Settings → Network → Advanced → ONVIF → Enable, port **8000**)
+- Assign a static IP in the `192.168.4.x` range (e.g. `192.168.4.10`, `.11`, …)
+
+**5b — Connect to the bench**
+- Plug all cameras into a switch
+- Power on the Pi — it broadcasts `Kiki-Setup` automatically
+- Connect your laptop to `Kiki-Setup` WiFi
+- Open `http://192.168.4.1:5000` — you are auto-logged in
+
+**5c — Register each camera in the Kiki UI**
+
+Go to **Cameras → Add Camera** and fill in:
+- **Name** — what the customer will see (e.g. "Front Door")
+- **IP** — the camera's static bench IP (e.g. `192.168.4.10`)
+- **Username / Password** — the camera's ONVIF credentials
+- **ONVIF** — tick the checkbox, set port to **8000** for Reolink (80 for most others), click **Auto-detect profiles**, select a profile
+
+**5d — Mark each camera for shipping**
+
+On each saved camera card, click **"Mark for shipping"**:
+- The app reads the ONVIF serial number from the live camera
+- Stores the serial, clears the bench IP, flags the camera as pending discovery
+- A "Searching…" badge appears on the card — this is correct
+
+> If the button returns an error, the camera is not reachable at its stored IP — check the static IP assignment and retry.
+
+After all cameras are marked, all camera cards should show the "Searching…" badge.
+
+---
+
+## Step 6 — Run the shipping preparation script
 
 ```bash
 sudo ./prepare_for_shipping.sh
@@ -109,14 +147,13 @@ Type `yes` when prompted. This is fully automated:
 | # | What it does |
 |---|-------------|
 | 1 | Stops any running services |
-| 2 | Wipes the database — cameras, passwords, events, recordings |
-| 3 | Generates a fresh `FERNET_KEY` for camera password encryption |
-| 4 | Compiles Python source to native `.so` binaries with Cython, strips debug symbols, removes `.py` source files and `.git` history |
-| 5 | Sets restrictive file permissions (`700` dirs, `600` secrets) |
-| 6 | Installs and enables `honeybadger.service` in systemd (auto-starts on boot) |
-| 7 | Adds sudoers and polkit rules so the service can manage iptables and NetworkManager |
-| 8 | Creates the `.first_boot` marker file |
-| 8b | Registers this device's Cloudflare tunnel hostname (`kiki-XXXXXX.kiki-technologies.com`) |
+| 2 | **If cameras are pre-configured:** clears only personal data (account, WiFi credentials, recordings) — preserves the cameras table and `FERNET_KEY`. **Otherwise:** wipes the entire database and generates a fresh `FERNET_KEY` |
+| 3 | Compiles Python source to native `.so` binaries with Cython, strips debug symbols, removes `.py` source files and `.git` history |
+| 4 | Sets restrictive file permissions (`700` dirs, `600` secrets) |
+| 5 | Installs and enables `honeybadger.service` in systemd (auto-starts on boot) |
+| 6 | Adds sudoers and polkit rules so the service can manage iptables and NetworkManager |
+| 7 | Creates the `.first_boot` marker file |
+| 8 | Registers this device's Cloudflare tunnel hostname (`kiki-XXXXXX.kiki-technologies.com`) |
 | 9 | Deletes all saved WiFi connections — forces AP mode on the customer's first boot |
 | 10 | Connects the device to Tailscale as `kiki-XXXXXX` |
 | 11 | Starts the service → AP mode activates → "Kiki-Setup" WiFi appears |
@@ -125,7 +162,7 @@ The device ID (`XXXXXX`) is derived from the last 6 characters of the WiFi MAC a
 
 ---
 
-## Step 6 — Verify the device
+## Step 7 — Verify the device
 
 1. On your phone, open WiFi settings
 2. Confirm **Kiki-Setup** appears — it is WPA2-protected
@@ -146,7 +183,7 @@ sudo journalctl -u honeybadger -n 50
 
 ---
 
-## Step 7 — Shut down, package, and ship
+## Step 8 — Shut down, package, and ship
 
 ```bash
 sudo shutdown -h now
@@ -154,6 +191,7 @@ sudo shutdown -h now
 
 - Ensure the SD card is seated firmly
 - Box with the power supply cable
+- If shipping with cameras: include each camera, the PoE switch, and Ethernet cables (one per camera)
 - Attach the printed QR label to the bottom of the device (the label includes the Kiki-Setup WiFi password)
 
 ---
@@ -161,16 +199,18 @@ sudo shutdown -h now
 ## What the customer does on first boot
 
 1. Plugs in the Pi — waits ~60 seconds for it to boot
-2. Sees **"Kiki-Setup"** WiFi on their phone
-3. The WiFi password is **`kiki-XXXXXX`** (last 6 hex digits of the device MAC, uppercase) —
+2. **If cameras were included:** plugs each camera into the PoE switch and connects the switch to their router
+3. Sees **"Kiki-Setup"** WiFi on their phone
+4. The WiFi password is **`kiki-XXXXXX`** (last 6 hex digits of the device MAC, uppercase) —
    this is printed on the label attached to the bottom of the device
-4. Connects to **Kiki-Setup** using that password — setup page opens automatically
-5. Selects home WiFi from the list, enters the password and their email address
-6. Taps **Connect** — the Pi reboots onto their home network, "Kiki-Setup" disappears
-7. Receives a welcome email with a link to the dashboard on their local network
-8. Clicks the link → creates a **username and password**
-9. Logs in — a 6-digit verification code is emailed for security
-10. Adds cameras from the **Cameras** page (ONVIF auto-scan or manual entry)
+5. Connects to **Kiki-Setup** using that password — setup page opens automatically
+6. Selects home WiFi from the list, enters the password and their email address
+7. Taps **Connect** — the Pi switches to their home network, "Kiki-Setup" disappears
+8. Receives a welcome email with a link to the dashboard on their local network
+9. Clicks the link → creates a **username and password**
+10. Logs in — a 6-digit verification code is emailed for security
+11. **If cameras were pre-configured:** home screen shows **"Find my cameras"** — tap it; the terminal scans the network, matches cameras by serial number, and activates them automatically
+12. **If no pre-configured cameras:** adds cameras from the **Cameras** page (ONVIF auto-scan or manual entry)
 
 ---
 
