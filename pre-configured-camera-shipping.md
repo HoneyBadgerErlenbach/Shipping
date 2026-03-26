@@ -53,27 +53,56 @@ factory resets and firmware updates.
 No account creation is required. The terminal web UI is auto-logged in when no
 password has been set up yet.
 
+### Bench network setup
+
+The Pi boots into AP mode when no WiFi is configured, broadcasting the `Kiki-Setup`
+network and always reachable at the fixed address `192.168.4.1`. Use this — no router
+needed.
+
+Cameras must be on the same subnet as the Pi so the ONVIF probe can reach them.
+The simplest way is to assign each camera a **static IP in the `192.168.4.x` range**
+before the factory session (via the camera's own web UI or manufacturer app).
+
+```
+Pi (AP mode):   192.168.4.1
+Camera 1:       192.168.4.10  (static, set via Reolink app / camera web UI)
+Camera 2:       192.168.4.11
+...
+```
+
+Plug all cameras into a switch. Connect the Pi to the same switch via Ethernet,
+or just power it on — its AP is already on `192.168.4.1`. Connect your laptop to the
+`Kiki-Setup` WiFi. Everything is now on the same subnet with no router required.
+
+> **Alternative:** plug everything into a bench router/switch with DHCP. In that case
+> find the Pi's IP via `http://kiki.local:5000` (works on macOS/Linux; Windows needs
+> Bonjour installed) or check the router's device list.
+
 ### Step-by-step
 
-**1. Connect everything to the bench network**
+**1. Prepare cameras**
 
-Plug the terminal and all cameras into the same Ethernet switch. Both the Pi and
-the cameras need to be on the same subnet (any /24 will do).
+Using the camera's own app or web interface (one-time per camera):
+- Set the admin password
+- Enable ONVIF (Reolink: Settings → Network → Advanced → ONVIF → Enable, port 8000)
+- Assign a static IP in the `192.168.4.x` range
 
-**2. Open the terminal web UI**
+**2. Connect to the bench**
 
-Navigate to `http://<terminal-ip>:5000` in a browser. You will be auto-logged in.
-If you see a login page, use the admin credentials you set during a prior session.
+- Plug cameras into a switch
+- Power on the Pi — it broadcasts `Kiki-Setup` automatically
+- Connect your laptop to `Kiki-Setup` WiFi
+- Open `http://192.168.4.1:5000` — you are auto-logged in
 
 **3. Add each camera via the Cameras page**
 
 Go to **Cameras** in the nav. Click **Add Camera** and fill in:
 - **Name** — the name the customer will see (e.g. "Front Door", "Garden")
-- **IP** — the camera's current bench IP
+- **IP** — the camera's static bench IP (e.g. `192.168.4.10`)
 - **Username / Password** — the camera's ONVIF credentials
-- **ONVIF** — tick the ONVIF checkbox, click **Auto-detect profiles**, select a profile
+- **ONVIF** — tick the ONVIF checkbox; set port to **8000** for Reolink (80 for most others); click **Auto-detect profiles**, select a profile
 
-The system will test the connection before saving.
+The system tests the connection before saving.
 
 **4. Mark each camera for shipping**
 
